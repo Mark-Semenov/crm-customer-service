@@ -2,6 +2,7 @@ package ru.bwforum.mark.customer.service.api.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import ru.bwforum.mark.customer.service.api.dto.CompanyDTO;
 import ru.bwforum.mark.customer.service.api.dto.CustomerDTO;
 import ru.bwforum.mark.customer.service.api.service.CustomerService;
 
+@Log4j2
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
