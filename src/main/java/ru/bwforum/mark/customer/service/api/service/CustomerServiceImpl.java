@@ -2,7 +2,6 @@ package ru.bwforum.mark.customer.service.api.service;
 
 import com.thoughtworks.xstream.converters.reflection.MissingFieldException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,7 +18,6 @@ import java.util.NoSuchElementException;
 public class CustomerServiceImpl implements CustomerService<CustomerDTO, CompanyDTO> {
 
     private final CustomerRepository customerRepository;
-    private final RabbitTemplate rabbit;
 
     @Override
     public Mono<CustomerDTO> getCustomerById(String customerId) {
@@ -75,7 +73,6 @@ public class CustomerServiceImpl implements CustomerService<CustomerDTO, Company
                 .findAll()
                 .map(CustomerMapper::mapToCustomerDto)
                 .doOnNext(item -> item.setDelete(true))
-                .doOnNext(rabbit::convertAndSend)
                 .map(CustomerDTO::getId)
                 .flatMap(customerRepository::deleteById)
                 .then()
@@ -89,7 +86,6 @@ public class CustomerServiceImpl implements CustomerService<CustomerDTO, Company
                 .findById(customerId)
                 .map(CustomerMapper::mapToCustomerDto)
                 .doOnNext(item -> item.setDelete(true))
-                .doOnNext(rabbit::convertAndSend)
                 .map(CustomerDTO::getId)
                 .flatMap(customerRepository::deleteById)
                 .log();
@@ -101,7 +97,6 @@ public class CustomerServiceImpl implements CustomerService<CustomerDTO, Company
         return customerRepository
                 .save(customer)
                 .map(CustomerMapper::mapToCustomerDto)
-                .doOnNext(rabbit::convertAndSend)
                 .log();
     }
 
@@ -116,19 +111,8 @@ public class CustomerServiceImpl implements CustomerService<CustomerDTO, Company
                 .map(item -> updated)
                 .flatMap(customerRepository::save)
                 .map(CustomerMapper::mapToCustomerDto)
-                .doOnNext(rabbit::convertAndSend)
                 .log();
     }
 
-    private void sendToDeleteId(CustomerDTO dto, Customer item) {
-        for (String id : item.getCompaniesId()) {
-            if (!dto.getUniqueCompaniesId().contains(id)) {
-                CompanyDTO build = CompanyDTO.builder()
-                        .id(id)
-                        .isDelete(true)
-                        .build();
-                rabbit.convertAndSend(build);
-            }
-        }
-    }
+
 }

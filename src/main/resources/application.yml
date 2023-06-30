@@ -5,20 +5,17 @@ spring:
   application:
     name: customer-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8000/realms/crm_realm
+
   data:
     mongodb:
       host: localhost
       port: 27017
       database: customerdb
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: mark
-    password: password
-    template:
-      routing-key: customer_key
-      exchange: crm
 
 eureka:
   instance:
